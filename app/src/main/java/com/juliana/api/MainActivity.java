@@ -1,0 +1,67 @@
+ package com.juliana.api;
+
+import android.os.Bundle;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.gson.Gson;
+import com.juliana.api.modelos.Pokemon;
+import com.juliana.api.modelos.pokemonResponse;
+
+import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+ public class MainActivity extends AppCompatActivity {
+    private Retrofit retrofit;
+    private static final String BASEURL = "https://pokeapi.co/api/v2/";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASEURL)
+                .build();
+
+            obtenerDatosPokemon();
+
+    }
+    private void obtenerDatosPokemon(){
+        APIService service = retrofit.create(APIService.class);
+        Call<pokemonResponse> respuesta =service.obtenerListaPokemon();
+
+        respuesta.enqueue(new Callback<pokemonResponse>() {
+            @Override
+            public void onResponse(Call<pokemonResponse> call, Response<pokemonResponse> response) {
+                if(response.isSuccessful()){
+                    pokemonResponse respuestaApi = response.body();
+                    ArrayList<Pokemon>listaPokemon = respuestaApi.getResultados();
+                    for(int i=0; i<listaPokemon.size();i++){
+                        //asignar a un adaptador y mostrarlo en pantalla
+                        Pokemon pokemon =listaPokemon.get(i);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<pokemonResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Error consulta", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+
+    }
+}
